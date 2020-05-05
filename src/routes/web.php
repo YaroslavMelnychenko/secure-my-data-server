@@ -16,3 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/minio', function () {
+    Storage::disk(config('filesystems.cloud'))->put('file.txt', 'Test file write successful', 'public');
+
+    return Storage::disk(config('filesystems.cloud'))->get('file.txt');
+});
