@@ -1,0 +1,65 @@
+version: '3'
+
+networks: 
+    laravel:
+
+services: 
+    nginx:
+        image: nginx:alpine
+        container_name: nginx
+        ports: 
+            - "80:80"
+        volumes: 
+            - /D/OSPanel/domains/secure-my-data-server/src:/var/www/html
+            - /D/OSPanel/domains/secure-my-data-server/nginx:/etc/nginx/conf.d
+        depends_on: 
+            - php
+            - mysql
+        networks: 
+            - laravel
+
+    mysql:
+        image: mysql:5.7.22
+        container_name: mysql
+        command: --innodb-use-native-aio=0
+        restart: unless-stopped
+        tty: true
+        ports: 
+            - "3306:3306"
+        volumes: 
+            - /D/OSPanel/domains/secure-my-data-server/mysql:/var/lib/mysql
+        environment: 
+            MYSQL_DATABASE: homestead
+            MYSQL_USER: homestead
+            MYSQL_PASSWORD: secret
+            MYSQL_ROOT_PASSWORD: secret
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        networks: 
+            - laravel
+
+    php:
+        build: 
+            context: .
+            dockerfile: Php.Dockerfile
+        volumes: 
+            - /D/OSPanel/domains/secure-my-data-server/src:/var/www/html
+        ports: 
+            - "9000:9000"
+        networks: 
+            - laravel
+
+    minio:
+        image: minio/minio
+        container_name: minio
+        command: server /data
+        tty: true
+        ports: 
+            - "9090:9000"
+        volumes: 
+            - /D/OSPanel/domains/secure-my-data-server/minio:/data
+        environment: 
+            MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
+            MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+        networks: 
+            - laravel
