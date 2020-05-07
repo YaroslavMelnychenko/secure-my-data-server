@@ -10,8 +10,8 @@ services:
         ports: 
             - "80:80"
         volumes: 
-            - /D/OSPanel/domains/secure-my-data-server/src:/var/www/html
-            - /D/OSPanel/domains/secure-my-data-server/nginx:/etc/nginx/conf.d
+            - /D/smd/server/src:/var/www/html
+            - /D/smd/server/nginx:/etc/nginx/conf.d
         depends_on: 
             - php
             - mysql
@@ -27,7 +27,7 @@ services:
         ports: 
             - "3306:3306"
         volumes: 
-            - /D/OSPanel/domains/secure-my-data-server/mysql:/var/lib/mysql
+            - /D/smd/server/mysql:/var/lib/mysql
         environment: 
             MYSQL_DATABASE: homestead
             MYSQL_USER: homestead
@@ -43,7 +43,7 @@ services:
             context: .
             dockerfile: Php.Dockerfile
         volumes: 
-            - /D/OSPanel/domains/secure-my-data-server/src:/var/www/html
+            - /D/smd/server/src:/var/www/html
         ports: 
             - "9000:9000"
         networks: 
@@ -57,7 +57,7 @@ services:
         ports: 
             - "9090:9000"
         volumes: 
-            - /D/OSPanel/domains/secure-my-data-server/minio:/data
+            - /D/smd/server/minio:/data
         environment: 
             MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
             MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY

@@ -50,6 +50,10 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        return parent::render($request, $exception);
+        $pathArray = explode('\\', get_class($exception));
+
+        $className = array_pop($pathArray);
+
+        return ResponseSender::$className($request, $exception);
     }
 }
