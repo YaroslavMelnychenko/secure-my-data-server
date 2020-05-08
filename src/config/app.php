@@ -177,6 +177,8 @@ return [
 
         App\Providers\MinioStorageServiceProvider::class,
 
+        Laravel\Passport\PassportServiceProvider::class,
+
     ],
 
     /*

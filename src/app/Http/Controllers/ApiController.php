@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Response;
+use App\Mail\TestMail;
+use Illuminate\Support\Facades\Mail;
 
 class ApiController extends Controller
 {

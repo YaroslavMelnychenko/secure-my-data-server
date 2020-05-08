@@ -9,7 +9,7 @@ class ResponseSender
 {
     public static function __callStatic($name, $arguments) {
         if(config('app.env') === 'local') {
-            return Response::error($arguments[1]->getMessage(), 'INTERNAL_ERROR');
+            return Response::error(get_class($arguments[1]).'. '.$arguments[1]->getMessage(), 'INTERNAL_ERROR');
         } else {
             return Response::error('Internal server error', 'INTERNAL_ERROR');
         }
@@ -31,6 +31,23 @@ class ResponseSender
     }
 
     public static function QueryException($request, $exception) {
+        dd($exception);
         return Response::error('Database error', 'INTERNAL_ERROR');
+    }
+
+    public static function MethodNotAllowedHttpException($request, $exception) {
+        return Response::error($exception->getMessage(), 'METHOD_NOT_ALLOWED');
+    }
+
+    public static function ValidationException($request, $exception) {
+        return Response::error($exception->errors(), 'VALIDATION_ERROR');
+    }
+
+    public static function AuthenticationException($request, $exception) {
+        return Response::error('Unauthenticated. Proceed to '.route('login').' for authentication', 'UNAUTHORIZED');
+    }
+
+    public static function OAuthServerException($request, $exception) {
+        return Response::error($exception->getMessage(), 'UNAUTHORIZED');
     }
 }
