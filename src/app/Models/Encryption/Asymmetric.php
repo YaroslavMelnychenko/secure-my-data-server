@@ -22,7 +22,7 @@ class Asymmetric {
     }
 
     private function generateKeyFile($hex, $userData = []) {
-        $header = "SecureMyData\nElliptic Curve25519 secret key\n";
+        $header = config('app.name')."\nElliptic Curve25519 secret key\n";
         $content = "";
         
         foreach($userData as $key => $value) {
