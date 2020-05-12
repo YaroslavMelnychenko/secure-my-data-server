@@ -10,8 +10,8 @@ services:
         ports: 
             - "80:80"
         volumes: 
-            - /D/smd/server/src:/var/www/html
-            - /D/smd/server/nginx:/etc/nginx/conf.d
+            - ${BASE_PATH}/src:/var/www/html
+            - ${BASE_PATH}/nginx:/etc/nginx/conf.d
         depends_on: 
             - php
             - mysql
@@ -27,7 +27,7 @@ services:
         ports: 
             - "3306:3306"
         volumes: 
-            - /D/smd/server/mysql:/var/lib/mysql
+            - ${BASE_PATH}/mysql:/var/lib/mysql
         environment: 
             MYSQL_DATABASE: homestead
             MYSQL_USER: homestead
@@ -44,7 +44,7 @@ services:
             dockerfile: Php.Dockerfile
         tty: true
         volumes: 
-            - /D/smd/server/src:/var/www/html
+            - ${BASE_PATH}/src:/var/www/html
         ports: 
             - "9000:9000"
         networks: 
@@ -58,7 +58,7 @@ services:
         ports: 
             - "9090:9000"
         volumes: 
-            - /D/smd/server/minio:/data
+            - ${BASE_PATH}/minio:/data
         environment: 
             MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
             MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY

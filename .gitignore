@@ -2,3 +2,4 @@ minio/*
 mysql/*
 !minio/.gitkeep
 !mysql/.gitkeep
+.env
