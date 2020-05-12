@@ -51,7 +51,7 @@ services:
             - laravel
 
     minio:
-        image: minio/minio
+        image: minio/minio:RELEASE.2020-05-01T22-19-14Z
         container_name: minio
         command: server /data
         tty: true
