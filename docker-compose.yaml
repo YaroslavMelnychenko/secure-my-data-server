@@ -29,10 +29,10 @@ services:
         volumes: 
             - ${BASE_PATH}/mysql:/var/lib/mysql
         environment: 
-            MYSQL_DATABASE: homestead
-            MYSQL_USER: homestead
-            MYSQL_PASSWORD: secret
-            MYSQL_ROOT_PASSWORD: secret
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
             SERVICE_TAGS: dev
             SERVICE_NAME: mysql
         networks: 
@@ -60,7 +60,7 @@ services:
         volumes: 
             - ${BASE_PATH}/minio:/data
         environment: 
-            MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
-            MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+            MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+            MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
         networks: 
             - laravel
