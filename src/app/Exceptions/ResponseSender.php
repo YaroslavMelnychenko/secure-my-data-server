@@ -8,8 +8,14 @@ use Carbon\Carbon;
 class ResponseSender
 {
     public static function __callStatic($name, $arguments) {
+        $exception = $arguments[1];
+
         if(config('app.env') === 'local') {
-            return Response::error(get_class($arguments[1]).'. '.$arguments[1]->getMessage(), 'INTERNAL_ERROR');
+            return Response::send([
+                'error' => true,
+                'message' => get_class($exception).'. '.$exception->getMessage(),
+                'trace' => $exception->getTrace()
+            ], 'INTERNAL_ERROR');
         } else {
             return Response::error('Internal server error', 'INTERNAL_ERROR');
         }

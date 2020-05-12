@@ -6,6 +6,9 @@ use App\Models\User;
 use Faker\Generator as Faker;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use App\Helpers;
+
+use App\Models\Encryption\Asymmetric;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +24,8 @@ use Illuminate\Support\Facades\Hash;
 $factory->define(User::class, function (Faker $faker) {
     return [
         'email' => $faker->unique()->safeEmail,
-        'email_verified_at' => now(),
-        'password' => bcrypt('passwordstring')
+        'verified' => true,
+        'password' => bcrypt('passwordstring'),
+        'public_key' => Asymmetric::createKeyPair(Helpers::randomHex(256))->exportPublicKey()
     ];
 });

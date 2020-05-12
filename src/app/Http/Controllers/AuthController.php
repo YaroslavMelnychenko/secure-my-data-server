@@ -8,36 +8,84 @@ use App\Http\Requests\AuthRefreshRequest;
 use App\Http\Response;
 
 use Illuminate\Support\Facades\Auth;
-use Laravel\Passport\Client as OClient; 
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Str;
+use Laravel\Passport\Client as OauthClient; 
+
+use App\Models\User;
+use App\Models\Encryption\Asymmetric;
 
 class AuthController extends Controller
 {
-    private function issueTokens($request, $refresh = false) {
-        $oClient = OClient::where('password_client', 1)->first();
+    private function ouathRequest($params) {
+        $oauthClient = OauthClient::where('password_client', 1)->first();
 
-        $params = [
-            'client_id' => $oClient->id,
-            'client_secret' => $oClient->secret,
+        $secretParams = [
+            'client_id' => $oauthClient->id,
+            'client_secret' => $oauthClient->secret,
             'scope' => '*',
         ];
 
-        if($refresh) {
-            $params = array_merge($params, [
-                'grant_type' => 'refresh_token',
-                'refresh_token' => $request->refresh_token
-            ]);
+        $params = array_merge($params, $secretParams);
+        $proxy = Request::create('/oauth/token','POST', $params);
+        $response = app()->handle($proxy);
+
+        return json_decode((string) $response->getContent(), true);        
+    }
+
+    private function issueTokens($request) {
+        return $this->ouathRequest([
+            'grant_type' => 'password',
+            'username' => $request->email,
+            'password' => $request->password,
+        ]);
+    }
+
+    private function refreshTokens($request) {
+        return $this->ouathRequest([
+            'grant_type' => 'refresh_token',
+            'refresh_token' => $request->refresh_token
+        ]);
+    }
+
+    public function login(AuthLoginRequest $request) {
+        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+
+            $user = Auth::user();
+
+            $keyPair = Asymmetric::restoreKeyPair($request->private_key);
+
+            if(!$keyPair || !$keyPair->test()) {
+                return Response::send([
+                    'error' => true,
+                    'message' => 'Bad or damaged key'
+                ], 'BAD_REQUEST');
+            }
+
+            if(!$user->asymmetricChallenge($keyPair)) {
+                return Response::send([
+                    'error' => true,
+                    'message' => 'Wrong key'
+                ], 'UNAUTHORIZED');
+            }
+        
+            return Response::send([
+                'error' => false,
+                'message' => $this->issueTokens($request)
+            ], 'SUCCESS');
+
         } else {
-            $params = array_merge($params, [
-                'grant_type' => 'password',
-                'username' => $request->email,
-                'password' => $request->password,
-            ]);
-        };
 
-        $jsonResponse = Http::asForm()->post(config('app.url').'/oauth/token', $params);
+            return Response::send([
+                'error' => true,
+                'message' => 'Wrong credentials'
+            ], 'UNAUTHORIZED');
 
-        $response = json_decode((string) $jsonResponse->getBody(), true);
+        }        
+    }
+
+    public function refresh(AuthRefreshRequest $request) {
+        $response = $this->refreshTokens($request);
         
         if(array_key_exists('message', $response)) {
             return Response::send($response, 'UNAUTHORIZED');
@@ -49,24 +97,22 @@ class AuthController extends Controller
         }
     }
 
-    public function login(AuthLoginRequest $request) {
-        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            
-            return $this->issueTokens($request);
-
-        } else {
+    public function register(AuthRegisterRequest $request) {
+        if(User::exists($request->email)) {
             return Response::send([
                 'error' => true,
-                'message' => 'Wrong credentials'
-            ], 'UNAUTHORIZED');
-        }        
-    }
+                'message' => "User with email {$request->email} already exists"
+            ], 'ALREADY_EXISTS');
+        } 
 
-    public function refresh(AuthRefreshRequest $request) {
-        return $this->issueTokens($request, true); 
-    }
+        $keyPair = Asymmetric::createKeyPair($request->seed);
 
-    public function register(AuthRegisterRequest $request) {
-        return Response::send('test', 'SUCCESS');
+        $user = User::create($request, $keyPair);
+
+        return response()->streamDownload(function () use ($keyPair, $request) {
+            echo $keyPair->exportPrivateKey([ 'email' => $request->email ]);
+        }, Str::random(32).'.key', [
+            'Content-Type' => 'text/plain'
+        ]);
     }
 }

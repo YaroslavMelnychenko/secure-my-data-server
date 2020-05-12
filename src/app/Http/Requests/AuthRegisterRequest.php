@@ -25,7 +25,8 @@ class AuthRegisterRequest extends FormRequest
     {
         return [
             'email' => ['required', 'email'],
-            'password' => ['required', 'min:10']
+            'password' => ['required', 'min:10'],
+            'seed' => ['required', 'alpha_num', 'min:256', 'max:256']
         ];
     }
 }

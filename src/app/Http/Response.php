@@ -5,12 +5,16 @@ namespace App\Http;
 class Response
 {
     public static $statusCodes = [
-        'NOT_FOUND' => 404,
         'SUCCESS' => 200,
-        'VALIDATION_ERROR' => 422,
-        'INTERNAL_ERROR' => 500,
-        'METHOD_NOT_ALLOWED' => 405,
+
+        'BAD_REQUEST' => 400,
         'UNAUTHORIZED' => 401,
+        'ALREADY_EXISTS' => 403,
+        'NOT_FOUND' => 404,
+        'METHOD_NOT_ALLOWED' => 405,
+        'VALIDATION_ERROR' => 422,
+
+        'INTERNAL_ERROR' => 500,        
         'TOO_MANY_ATTEMPTS' => 503
     ];
 

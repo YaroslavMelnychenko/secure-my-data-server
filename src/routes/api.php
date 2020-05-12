@@ -23,8 +23,9 @@ Route::prefix('/auth')->group(function() {
 });
 
 Route::prefix('/users')->group(function() {
-    Route::group(['middleware' => 'auth:api'], function() {
+    Route::group(['middleware' => ['auth:api']], function() {
         Route::name('users.')->group(function() {
+            Route::post('/verify', 'UserController@verify')->name('verify');
             Route::get('/details', 'UserController@details')->name('details');
         });
     });
