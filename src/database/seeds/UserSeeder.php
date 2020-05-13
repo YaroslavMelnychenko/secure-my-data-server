@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
+
 use App\Models\User;
 use App\Models\Encryption\Asymmetric;
 
@@ -15,16 +17,19 @@ class UserSeeder extends Seeder
     {
         $seed = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
-        $users = factory(User::class, 10)->make();
+        $verifiedUsers = factory(User::class, 10)->states('verified')->create([
+            'public_key' => Asymmetric::createKeyPair($seed)->exportPublicKey()
+        ]);
 
-        $customUser = new User();
-        $customUser->email = 'test@example.com';
-        $customUser->password = bcrypt('passwordstring');
-        $customUser->verification_code = '123456';
-        $customUser->public_key = Asymmetric::createKeyPair($seed)->exportPublicKey();
+        $unverifiedUsers = factory(User::class, 10)->states('unverified')->create([
+            'public_key' => Asymmetric::createKeyPair($seed)->exportPublicKey()
+        ]);
 
-        $users->push($customUser);
-
-        foreach($users as $user) $user->save();
+        $customUser = factory(User::class)->create([
+            'email' => 'test@example.com',
+            'verified' => false,
+            'verification_code' => '123456',
+            'public_key' => Asymmetric::createKeyPair($seed)->exportPublicKey()
+        ]);
     }
 }

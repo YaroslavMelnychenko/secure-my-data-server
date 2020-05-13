@@ -25,9 +25,14 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $sessionLifetime = (int) config('passport.session_lifetime');
+
+        $accessTokenLifetime = $sessionLifetime;
+        $refreshTokenLifetime = 2 * $accessTokenLifetime;
+
         $this->registerPolicies();
         Passport::routes();
-        Passport::tokensExpireIn(Carbon::now()->addMinutes(30));
-        Passport::refreshTokensExpireIn(Carbon::now()->addMinutes(60));
+        Passport::tokensExpireIn(Carbon::now()->addMinutes($accessTokenLifetime));
+        Passport::refreshTokensExpireIn(Carbon::now()->addMinutes($refreshTokenLifetime));
     }
 }

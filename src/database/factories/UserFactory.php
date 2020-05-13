@@ -24,8 +24,21 @@ use App\Models\Encryption\Asymmetric;
 $factory->define(User::class, function (Faker $faker) {
     return [
         'email' => $faker->unique()->safeEmail,
-        'verified' => true,
         'password' => bcrypt('passwordstring'),
         'public_key' => Asymmetric::createKeyPair(Helpers::randomHex(256))->exportPublicKey()
+    ];
+});
+
+$factory->state(User::class, 'verified', function ($faker) {
+    return [
+        'verified' => true,
+        'verification_code' => null
+    ];
+});
+
+$factory->state(User::class, 'unverified', function ($faker) {
+    return [
+        'verified' => false,
+        'verification_code' => $faker->randomNumber(6)
     ];
 });

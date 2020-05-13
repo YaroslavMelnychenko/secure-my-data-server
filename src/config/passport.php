@@ -30,4 +30,6 @@ return [
 
     'client_uuids' => true,
 
+    'session_lifetime' => env('PASSPORT_SESSION_LIFETIME', 30),
+
 ];
