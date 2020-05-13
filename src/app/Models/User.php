@@ -9,6 +9,8 @@ use Laravel\Passport\HasApiTokens;
 
 use App\Models\Traits\Uuid;
 use App\Models\Encryption\Asymmetric;
+use App\Models\Session;
+
 use App\Http\Requests\AuthRegisterRequest;
 
 use App\Events\UserRegistered;
@@ -34,17 +36,17 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'verification_code', 'public_key'
+        'password', 
+        'verification_code', 
+        'public_key',
+        'created_at',
+        'updated_at',
+        'id'
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function session() {
+        return $this->hasOne(Session::class);
+    }
 
     public function asymmetricChallenge(Asymmetric $keyPair) {
         return $this->public_key == $keyPair->exportPublicKey();

@@ -11,9 +11,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 use Laravel\Passport\Client as OauthClient; 
+use Laravel\Passport\RefreshToken;
 
 use App\Models\User;
 use App\Models\Encryption\Asymmetric;
+use App\Models\Session;
 
 class AuthController extends Controller
 {
@@ -68,10 +70,15 @@ class AuthController extends Controller
                     'message' => 'Wrong key'
                 ], 'UNAUTHORIZED');
             }
+
+            $oauthResponse = $this->issueTokens($request);
+
+            $session = Session::createInstance($user, $oauthResponse['refresh_token']);
+            $session->storeKeyPair($keyPair);
         
             return Response::send([
                 'error' => false,
-                'message' => $this->issueTokens($request)
+                'message' => $oauthResponse
             ], 'SUCCESS');
 
         } else {
@@ -85,14 +92,17 @@ class AuthController extends Controller
     }
 
     public function refresh(AuthRefreshRequest $request) {
-        $response = $this->refreshTokens($request);
+        $oauthResponse = $this->refreshTokens($request);
         
-        if(array_key_exists('message', $response)) {
-            return Response::send($response, 'UNAUTHORIZED');
+        if(array_key_exists('message', $oauthResponse)) {
+            return Response::send($oauthResponse, 'UNAUTHORIZED');
         } else {
+            
+            Session::refreshInstance($request->refresh_token, $oauthResponse['refresh_token']);
+
             return Response::send([
                 'error' => false,
-                'message' => $response
+                'message' => $oauthResponse
             ], 'SUCCESS');
         }
     }

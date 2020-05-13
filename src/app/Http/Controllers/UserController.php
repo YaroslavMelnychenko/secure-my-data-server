@@ -44,9 +44,14 @@ class UserController extends Controller
     }
 
     public function details() {
+        $user = Auth::user();
+
+        $details = $user;
+        $details['session'] = $user->session;
+
         return Response::send([
             'error' => false,
-            'message' => Auth::user()
+            'message' => $details
         ], 'SUCCESS');
     }
 }

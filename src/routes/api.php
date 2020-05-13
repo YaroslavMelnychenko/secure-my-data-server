@@ -49,9 +49,6 @@ Route::prefix('/users')->name('users.')->group(function() {
                 /** Resend verification code to user`s email address */
                 Route::get('/resend', 'UserController@resendVerification')->name('verify.resend');
             }); 
-    
-            /** Get common user`s information */
-            Route::get('/details', 'UserController@details')->name('details');
 
         });
 
@@ -61,6 +58,9 @@ Route::prefix('/users')->name('users.')->group(function() {
             /** Another endpoints only for verified users */
 
         });
+
+        /** Get common user`s information */
+        Route::get('/details', 'UserController@details')->name('details');
 
     });
 

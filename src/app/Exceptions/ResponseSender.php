@@ -37,7 +37,6 @@ class ResponseSender
     }
 
     public static function QueryException($request, $exception) {
-        dd($exception);
         return Response::error('Database error', 'INTERNAL_ERROR');
     }
 

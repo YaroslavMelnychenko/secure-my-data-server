@@ -9,15 +9,16 @@ use Illuminate\Support\Facades\Mail;
 
 class ApiController extends Controller
 {
-    protected $apiInfo = [
-        'description' => 'Secure My Data API for the safe storage of confidential data on the Internet',
-        'version' => '1.0'
-    ];
-
     public function index() {
+        $apiInfo = [
+            'description' => 'Secure My Data API for the safe storage of confidential data on the Internet',
+            'version' => '1.0',
+            'session_lifetime' => config('passport.session_lifetime')
+        ];
+
         return Response::send([
             'error' => false,
-            'message' => $this->apiInfo
+            'message' => $apiInfo
         ], 'SUCCESS');
     }
 }
