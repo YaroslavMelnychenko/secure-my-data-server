@@ -88,6 +88,18 @@ class Session extends Model
         $this->refresh_stamp = md5($refreshToken);
     }
 
+    public static function dropAll() {
+        $instances = self::all();
+
+        foreach($instances as $instance) $instance->drop();
+
+        $staticInstance = new static();
+
+        $staticInstance->tempDisk()->deleteDirectory('temp');
+        $staticInstance->sessionDisk()->deleteDirectory('session');
+        $staticInstance->delete();
+    }
+
     public static function purgeExpired() {
         $instances = self::where('expires_at', '<', Carbon::now())->get();
 

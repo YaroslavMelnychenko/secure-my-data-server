@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\AuthLoginRequest;
-use App\Http\Requests\AuthRegisterRequest;
-use App\Http\Requests\AuthRefreshRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\RefreshRequest;
 use App\Http\Response;
 
 use Illuminate\Support\Facades\Auth;
@@ -50,7 +50,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function login(AuthLoginRequest $request) {
+    public function login(LoginRequest $request) {
         if(Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
 
             $user = Auth::user();
@@ -91,7 +91,7 @@ class AuthController extends Controller
         }        
     }
 
-    public function refresh(AuthRefreshRequest $request) {
+    public function refresh(RefreshRequest $request) {
         $oauthResponse = $this->refreshTokens($request);
         
         if(array_key_exists('message', $oauthResponse)) {
@@ -107,7 +107,7 @@ class AuthController extends Controller
         }
     }
 
-    public function register(AuthRegisterRequest $request) {
+    public function register(RegisterRequest $request) {
         if(User::exists($request->email)) {
             return Response::send([
                 'error' => true,

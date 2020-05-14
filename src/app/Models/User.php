@@ -10,8 +10,9 @@ use Laravel\Passport\HasApiTokens;
 use App\Models\Traits\Uuid;
 use App\Models\Encryption\Asymmetric;
 use App\Models\Session;
+use App\Models\SecuredData;
 
-use App\Http\Requests\AuthRegisterRequest;
+use App\Http\Requests\Auth\RegisterRequest;
 
 use App\Events\UserRegistered;
 
@@ -48,11 +49,15 @@ class User extends Authenticatable
         return $this->hasOne(Session::class);
     }
 
+    public function data() {
+        return $this->hasMany(SecuredData::class);
+    }
+
     public function asymmetricChallenge(Asymmetric $keyPair) {
         return $this->public_key == $keyPair->exportPublicKey();
     }
 
-    public static function create(AuthRegisterRequest $request, Asymmetric $keyPair) {
+    public static function create(RegisterRequest $request, Asymmetric $keyPair) {
         $instance = new static;
         $instance->email = $request->email;
         $instance->password = bcrypt($request->password);

@@ -11,7 +11,8 @@ services:
             - "80:80"
         volumes: 
             - ${BASE_PATH}/src:/var/www/html
-            - ${BASE_PATH}/nginx:/etc/nginx/conf.d
+            - ${BASE_PATH}/nginx/conf.d:/etc/nginx/conf.d
+            - ${BASE_PATH}/nginx/nginx.conf:/etc/nginx/nginx.conf
         depends_on: 
             - php
             - mysql
@@ -40,12 +41,13 @@ services:
 
     php:
         build: 
-            context: .
-            dockerfile: Php.Dockerfile
+            context: ./php
+            dockerfile: Dockerfile
         tty: true
         container_name: php
         volumes: 
             - ${BASE_PATH}/src:/var/www/html
+            - ${BASE_PATH}/php/ini:/usr/local/etc/php/conf.d
         ports: 
             - "9000:9000"
         networks: 

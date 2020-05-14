@@ -5,19 +5,26 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 
 use App\Http\Response;
-use App\Http\Requests\UserVerifyRequest;
+use App\Http\Requests\User\VerifyRequest;
 use App\Events\UserRegistered;
 
 class UserController extends Controller
 {
-    public function verify(UserVerifyRequest $request) {
-        $user = Auth::user();
+    protected $user;
 
-        if($user->verification_code == $request->code) {
+    public function __construct() {
+        $this->middleware(function ($request, $next) {
+            $this->user = Auth::user(); 
+            return $next($request);
+        });
+    }
 
-            $user->verification_code = null;
-            $user->verified = true;
-            $user->save();
+    public function verify(VerifyRequest $request) {
+        if($this->user->verification_code == $request->code) {
+
+            $this->user->verification_code = null;
+            $this->user->verified = true;
+            $this->user->save();
 
             return Response::send([
                 'error' => false,
@@ -33,9 +40,7 @@ class UserController extends Controller
     }
 
     public function resendVerification() {
-        $user = Auth::user();
-
-        event(new UserRegistered($user));
+        event(new UserRegistered($this->user));
 
         return Response::send([
             'error' => false,
@@ -44,10 +49,8 @@ class UserController extends Controller
     }
 
     public function details() {
-        $user = Auth::user();
-
-        $details = $user;
-        $details['session'] = $user->session;
+        $details = $this->user;
+        $details['session'] = $this->user->session;
 
         return Response::send([
             'error' => false,

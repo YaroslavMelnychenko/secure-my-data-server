@@ -24,6 +24,10 @@ class ResponseSender
     public static function NotFoundHttpException($request, $exception) {
         return Response::error('Not round', 'NOT_FOUND');
     }
+    
+    public static function ModelNotFoundException($request, $exception) {
+        return Response::error('Requested resource is not found', 'NOT_FOUND');
+    }
 
     public static function ThrottleRequestsException($request, $exception) {
         $headers = $exception->getHeaders();

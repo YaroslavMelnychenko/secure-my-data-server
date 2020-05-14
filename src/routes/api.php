@@ -56,6 +56,7 @@ Route::prefix('/users')->name('users.')->group(function() {
         Route::middleware(['verified:yes'])->group(function() {
 
             /** Another endpoints only for verified users */
+            Route::resource('data', 'SecuredDataController', ['except' => ['create', 'edit']]);
 
         });
 
