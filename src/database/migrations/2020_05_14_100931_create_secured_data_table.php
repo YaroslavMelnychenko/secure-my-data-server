@@ -17,8 +17,8 @@ class CreateSecuredDataTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('user_id');
             $table->string('name');
-            $table->string('ext');
-            $table->string('mime_type');
+            $table->string('ext')->nullable();
+            $table->string('mime_type')->nullable();
             $table->timestamps();
         });
     }

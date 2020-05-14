@@ -10,6 +10,8 @@ class ResponseSender
     public static function __callStatic($name, $arguments) {
         $exception = $arguments[1];
 
+        dd($exception);
+
         if(config('app.env') === 'local') {
             return Response::send([
                 'error' => true,

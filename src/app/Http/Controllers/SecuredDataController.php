@@ -22,29 +22,20 @@ class SecuredDataController extends Controller
     }
 
     protected function storeAttachment(StoreRequest $request) {
-        $file = $request->file('attachment');
+        $securedData = SecuredData::storeAttachment($this->user, $request);
 
         return Response::send([
             'error' => false,
-            'message' => "Create secured data for user {$this->user->email}",
-            'request' => [
-                'size' => Helpers::formatBytes($file->getSize()),
-                'name' => $file->getClientOriginalName()
-            ]
+            'message' => $securedData
         ], 'SUCCESS');
     }
 
     protected function storePlainData(StoreRequest $request) {
-        $plainName = $request->input('plain_name');
-        $plainData = $request->input('plain_data');
+        $securedData = SecuredData::storePlainData($this->user, $request);
 
         return Response::send([
             'error' => false,
-            'message' => "Create secured data for user {$this->user->email}",
-            'request' => [
-                'plain_name' => $plainName,
-                'plain_data' => $plainData
-            ]
+            'message' => $securedData
         ], 'SUCCESS');
     }
 
@@ -73,14 +64,28 @@ class SecuredDataController extends Controller
     public function show(SecuredData $data) {
         $this->checkBelongsToUser($data);
 
-        return Response::send([
-            'error' => false,
-            'message' => $data
-        ], 'SUCCESS');
+        if($data->mime_type === null) {
+
+            return Response::send([
+                'error' => false,
+                'message' => $data->retrieve()
+            ], 'SUCCESS');
+ 
+        } else {
+
+            return response()->streamDownload(function () use ($data) {
+                echo $data->retrieve();
+            }, $data->getFullName(), [
+                'Content-Type' => $data->mime_type
+            ]);
+
+        }
     }
 
     public function update(UpdateRequest $request, SecuredData $data) {
         $this->checkBelongsToUser($data);
+
+        // update data name
 
         return Response::send([
             'error' => false,
@@ -91,6 +96,8 @@ class SecuredDataController extends Controller
 
     public function destroy(SecuredData $data) {
         $this->checkBelongsToUser($data);
+
+        // remove data
 
         return Response::send([
             'error' => false,
