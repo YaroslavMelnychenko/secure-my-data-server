@@ -13,4 +13,4 @@ RUN chmod 0644 /etc/cron.d/cron
 
 RUN touch /var/log/cron.log
 
-CMD printenv > /etc/environment && echo "cron starting..." && (cron) && : > /var/log/cron.log && tail -f /var/log/cron.log && crontab /etc/cron.d/cron
+CMD printenv > /etc/environment && echo "cron starting..." && (cron) && : > /var/log/cron.log && tail -f /var/log/cron.log ; crontab /etc/cron.d/cron

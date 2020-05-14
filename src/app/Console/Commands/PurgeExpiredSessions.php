@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Session;
+use Carbon\Carbon;
 
 class PurgeExpiredSessions extends Command
 {
@@ -40,6 +41,8 @@ class PurgeExpiredSessions extends Command
     {
         Session::purgeExpired();
 
-        $this->info('Expired sessions purged');
+        $time = Carbon::now();
+
+        $this->info($time. ': Expired sessions purged');
     }
 }

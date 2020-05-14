@@ -24,7 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('inspire')->everyMinute()->appendOutputTo(storage_path('logs/cron.log'));
+        $schedule->command('session:purge')->everyTenMinutes()->appendOutputTo(storage_path('logs/cron.log'));
     }
 
     /**

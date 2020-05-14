@@ -43,6 +43,7 @@ services:
             context: .
             dockerfile: Php.Dockerfile
         tty: true
+        container_name: php
         volumes: 
             - ${BASE_PATH}/src:/var/www/html
         ports: 
