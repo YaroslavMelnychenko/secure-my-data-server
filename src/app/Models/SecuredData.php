@@ -76,7 +76,7 @@ class SecuredData extends Model
 
             fclose($temp);
 
-            return file_get_contents($decryptedFile);
+            return $decryptedFile;
 
         }
     }
@@ -104,7 +104,7 @@ class SecuredData extends Model
 
         $encryptedFile = $instance->cryptor()->encryptFile($file->getRealPath());
 
-        $instance->saveToCloud(file_get_contents($encryptedFile));
+        $instance->saveToCloud($encryptedFile);
 
         return $instance;
     }

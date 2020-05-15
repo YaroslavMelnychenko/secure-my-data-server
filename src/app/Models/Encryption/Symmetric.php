@@ -17,24 +17,42 @@ class Symmetric {
     
     // encrypt data
 
-    private $key;
+    private $key, $tmp;
 
     private function __construct(EncryptionKey $key) {
         $this->key = $key;
     }
 
-    public function encryptFile($file) {
-        $encrypted = 'encrypted';
-        File::encrypt($file, $encrypted, $this->key);
+    private function createTmpFile() {
+        $tmp = tmpfile();
+        $this->tmp = $tmp;
+        return stream_get_meta_data($tmp)['uri'];
+    }
 
-        return $encrypted;
+    private function closeTmpFile() {
+        fclose($this->tmp);
+    }
+
+    public function encryptFile($file) {
+        $encrypted = $this->createTmpFile();
+
+        File::encrypt($file, $encrypted, $this->key);
+        $content = file_get_contents($encrypted);
+
+        $this->closeTmpFile();
+
+        return $content;
     }
 
     public function decryptFile($file) {
-        $decrypted = 'decrypted';
-        File::decrypt($file, $decrypted, $this->key);
+        $decrypted = $this->createTmpFile();
 
-        return $decrypted;
+        File::decrypt($file, $decrypted, $this->key);
+        $content = file_get_contents($decrypted);
+
+        $this->closeTmpFile();
+
+        return $content;
     }
 
     public function encrypt($plainData) {

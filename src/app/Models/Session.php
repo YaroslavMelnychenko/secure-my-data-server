@@ -27,22 +27,8 @@ class Session extends Model
         'refresh_stamp'
     ];
 
-    private function tempDisk() {
-        return Storage::disk('public');
-    }
-
     private function sessionDisk() {
         return Storage::disk('local');
-    }
-
-    private function createTempFile($name, $content) {
-        $this->tempDisk()->put('temp/'.$name, $content, 'public');
-
-        return $this->tempDisk()->url('temp/'.$name);
-    }
-
-    private function deleteTempFile($name) {
-        $this->tempDisk()->delete('temp/'.$name);
     }
 
     public function user() {
@@ -68,12 +54,10 @@ class Session extends Model
     public function obtaineKeyPair() {
         $keyMaterial = decrypt($this->sessionDisk()->get('session/keys/'.$this->id));
 
-        $tempName = Str::random(32);
-        $tempFile = $this->createTempFile($tempName, $keyMaterial);
-
-        $keyPair = Asymmetric::restoreKeyPair($tempFile);
-
-        $this->deleteTempFile($tempName);
+        $tempFile = tmpfile();
+        fwrite($tempFile, $keyMaterial);
+        $keyPair = Asymmetric::restoreKeyPair(stream_get_meta_data($tempFile)['uri']);
+        fclose($tempFile);
 
         return $keyPair;
     }
@@ -94,8 +78,6 @@ class Session extends Model
         foreach($instances as $instance) $instance->drop();
 
         $staticInstance = new static();
-
-        $staticInstance->tempDisk()->deleteDirectory('temp');
         $staticInstance->sessionDisk()->deleteDirectory('session');
         $staticInstance->delete();
     }
