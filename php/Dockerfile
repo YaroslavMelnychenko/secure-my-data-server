@@ -2,8 +2,9 @@ FROM php:7.2-fpm
 
 RUN apt-get update -y
 RUN apt-get install libsodium-dev -y
-RUN apt-get install nano
-RUN docker-php-ext-install pdo pdo_mysql sodium
+RUN apt-get install nano -y
+RUN apt-get install libpng-dev -y
+RUN docker-php-ext-install pdo pdo_mysql sodium gd
 
 RUN apt-get install -y cron
 

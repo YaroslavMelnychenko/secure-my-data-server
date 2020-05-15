@@ -2,10 +2,11 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
+
 use App\Models\SecuredData;
 use App\Models\User;
-use App\Models\Symmetric;
-use App\Models\Asymmetric;
 
 use Faker\Generator as Faker;
 
@@ -32,19 +33,13 @@ $factory->state(SecuredData::class, 'attachment', function ($faker) {
 
 $factory->afterCreating(SecuredData::class, function ($instance, $faker) {
     $data = $faker->paragraph(10);
-    $encryptedData = $instance->cryptor()->encrypt($data);
-    $instance->saveToCloud($encryptedData);
+    $name = $faker->catchPhrase;
+    
+    $instance->storePlainData($instance->user, $name, $data);
 });
 
 $factory->afterCreatingState(SecuredData::class, 'attachment', function ($instance, $faker) use ($pathToImages, $image) {
-    $imageFile = config('app.url').'/'.$pathToImages.'/'.$image;
-    
-    $tmp = tmpfile();
-    fwrite($tmp, file_get_contents($imageFile));
-    
-    $encryptedFile = $instance->cryptor()->encryptFile(stream_get_meta_data($tmp)['uri']);
+    $attachment = UploadedFile::fake()->image(Str::random(32).'.png', 1280, 1024)->size(2000);    
 
-    fclose($tmp);
-
-    $instance->saveToCloud($encryptedFile);
+    $instance->storeAttachment($instance->user, $attachment);
 });

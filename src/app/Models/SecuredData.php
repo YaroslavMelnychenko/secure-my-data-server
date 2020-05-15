@@ -4,12 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\File;
 
 use App\Models\Traits\Uuid;
 use App\Models\User;
 use App\Models\Encryption\Symmetric;
-
-use App\Http\Requests\User\Data\StoreRequest;
 
 class SecuredData extends Model
 {
@@ -20,13 +19,50 @@ class SecuredData extends Model
         'user'
     ];
 
-    protected function disk() {
-        return Storage::disk(config('filesystems.cloud'));
+    protected function cryptor() {
+        $asymmetricKeyPair = $this->user->session->obtaineKeyPair();
+         
+        return Symmetric::createFromAsymmetric($this->user->password, $asymmetricKeyPair);        
     }
 
     protected function fillInformation($array) {
         foreach($array as $key => $value)
             $this[$key] = $value;
+    }
+
+    protected function disk() {
+        return Storage::disk(config('filesystems.cloud'));
+    }
+
+    protected function saveToCloud($path) {
+        $this->disk()->putFileAs('secured', new File($path), $this->id);
+    }
+
+    protected function getFromCloud() {
+        return $this->disk()->get('secured/'.$this->id);
+    }
+
+    protected function removeFromCloud() {
+        $this->disk()->delete('secured/'.$this->id);
+    }
+
+    public function remove() {
+        $this->removeFromCloud();
+        $this->delete();
+    }
+
+    public function retrieve() {
+        if($this->mime_type == null) {
+            $encrypted = $this->getFromCloud();
+
+            return $this->cryptor()->decrypt($encrypted);
+        } else {
+            $tmp = tmpfile();
+            fwrite($tmp, $this->getFromCloud());
+            $decryptedFile = $this->cryptor()->decryptFile(stream_get_meta_data($tmp)['uri']);
+
+            return fread($decryptedFile, filesize(stream_get_meta_data($decryptedFile)['uri']));
+        }
     }
 
     public function user() {
@@ -37,11 +73,6 @@ class SecuredData extends Model
         return $this->user->id === $user->id;
     }
 
-    public function remove() {
-        $this->removeFromCloud();
-        $this->delete();
-    }
-
     public function getFullName() {
         if($this->ext === null) {
             return $this->name;
@@ -50,58 +81,21 @@ class SecuredData extends Model
         }
     }
 
-    public function retrieve() {
-        if($this->mime_type == null) {
-
-            $encrypted = $this->disk()->get($this->id);
-            $decrypted = $this->cryptor()->decrypt($encrypted);
-
-            return $decrypted;
-
-        } else {
-
-            $encryptedFile = $this->disk()->get($this->id);
-
-            $temp = tmpfile();
-            fwrite($temp, $encryptedFile);
-
-            $decryptedFile = $this->cryptor()->decryptFile(stream_get_meta_data($temp)['uri']);
-
-            fclose($temp);
-
-            return $decryptedFile;
-
-        }
-    }
-
-    public function cryptor() {
-        $asymmetricKeyPair = $this->user->session->obtaineKeyPair();
-         
-        return Symmetric::createFromAsymmetric($this->user->password, $asymmetricKeyPair);        
-    }
-
-    public function saveToCloud($content) {
-        $this->disk()->put($this->id, $content);
-    }
-
-    public function removeFromCloud() {
-        $this->disk()->delete($this->id);
-    }
-
-    public static function storeAttachment(User $user, StoreRequest $request) {
-        $file = $request->file('attachment');
-
-        $fullFileName = $file->getClientOriginalName();
+    public function storeAttachment(User $user, $attachment) {
+        $fullFileName = $attachment->getClientOriginalName();
 
         $tmp = explode(".", $fullFileName);
-        $fileExt = end($tmp);
+
+        if(count($tmp) <= 1)
+            $fileExt = null;
+        else
+            $fileExt = end($tmp);
+            
         $fileName = str_replace('.'.$fileExt, '', $fullFileName);
-        $fileMimeType = $file->getMimeType();
-        $fileOriginalSize = $file->getSize();
+        $fileMimeType = $attachment->getMimeType();
+        $fileOriginalSize = $attachment->getSize();
 
-        $instance = new static();
-
-        $instance->fillInformation([
+        $this->fillInformation([
             'user_id' => $user->id,
             'name' => $fileName,
             'ext' => $fileExt,
@@ -109,35 +103,31 @@ class SecuredData extends Model
             'size' => $fileOriginalSize
         ]);
 
-        $instance->save();
+        $this->save();
 
-        $encryptedFile = $instance->cryptor()->encryptFile($file->getRealPath());
+        $encryptedFile = $this->cryptor()->encryptFile($attachment->getRealPath());
 
-        $instance->saveToCloud($encryptedFile);
-
-        return $instance;
+        $this->saveToCloud(stream_get_meta_data($encryptedFile)['uri']);
     }
 
-    public static function storePlainData(User $user, StoreRequest $request) {
-        $name = $request->plain_name;
-        $data = $request->plain_data;
-
-        $instance = new static();
-
-        $instance->fillInformation([
+    public function storePlainData(User $user, $plainName, $plainData) {
+        $this->fillInformation([
             'user_id' => $user->id,
-            'name' => $name,
+            'name' => $plainName,
             'ext' => null,
             'mime_type' => null,
             'size' => null
         ]);
 
-        $instance->save();
+        $this->save();
+        
+        $encryptedData = $this->cryptor()->encrypt($plainData);
 
-        $encryptedData = $instance->cryptor()->encrypt($data);
+        $tmpFile = tmpfile();
+        fwrite($tmpFile, $encryptedData);
 
-        $instance->saveToCloud($encryptedData);
+        $this->saveToCloud(stream_get_meta_data($tmpFile)['uri']);
 
-        return $instance;
+        fclose($tmpFile);
     }
 }

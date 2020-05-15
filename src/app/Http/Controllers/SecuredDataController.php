@@ -22,7 +22,8 @@ class SecuredDataController extends Controller
     }
 
     protected function storeAttachment(StoreRequest $request) {
-        $securedData = SecuredData::storeAttachment($this->user, $request);
+        $securedData = new SecuredData();
+        $securedData->storeAttachment($this->user, $request->attachment);
 
         return Response::send([
             'error' => false,
@@ -31,7 +32,8 @@ class SecuredDataController extends Controller
     }
 
     protected function storePlainData(StoreRequest $request) {
-        $securedData = SecuredData::storePlainData($this->user, $request);
+        $securedData = new SecuredData();
+        $securedData->storePlainData($this->user, $request->plain_name, $request->plain_data);
 
         return Response::send([
             'error' => false,

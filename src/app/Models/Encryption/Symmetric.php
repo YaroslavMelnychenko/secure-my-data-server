@@ -13,46 +13,26 @@ use Illuminate\Support\Str;
 use App\Models\Encryption\Asymmetric;
 
 class Symmetric {
-    // generate single key
-    
-    // encrypt data
-
-    private $key, $tmp;
+    private $key;
 
     private function __construct(EncryptionKey $key) {
         $this->key = $key;
     }
 
-    private function createTmpFile() {
-        $tmp = tmpfile();
-        $this->tmp = $tmp;
-        return stream_get_meta_data($tmp)['uri'];
-    }
-
-    private function closeTmpFile() {
-        fclose($this->tmp);
-    }
-
     public function encryptFile($file) {
-        $encrypted = $this->createTmpFile();
+        $encrypted = tmpfile();
 
-        File::encrypt($file, $encrypted, $this->key);
-        $content = file_get_contents($encrypted);
+        File::encrypt($file, stream_get_meta_data($encrypted)['uri'], $this->key);
 
-        $this->closeTmpFile();
-
-        return $content;
+        return $encrypted;
     }
 
     public function decryptFile($file) {
-        $decrypted = $this->createTmpFile();
+        $decrypted = tmpfile();
 
-        File::decrypt($file, $decrypted, $this->key);
-        $content = file_get_contents($decrypted);
+        File::decrypt($file, stream_get_meta_data($decrypted)['uri'], $this->key);
 
-        $this->closeTmpFile();
-
-        return $content;
+        return $decrypted;
     }
 
     public function encrypt($plainData) {
