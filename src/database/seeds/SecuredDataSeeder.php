@@ -13,6 +13,7 @@ class SecuredDataSeeder extends Seeder
      */
     public function run()
     {
-        $securedDatas = factory(SecuredData::class, 10)->create();
+        $securedPlainDatas = factory(SecuredData::class, 5)->create();
+        $securedAttachments = factory(SecuredData::class, 5)->states('attachment')->create();
     }
 }

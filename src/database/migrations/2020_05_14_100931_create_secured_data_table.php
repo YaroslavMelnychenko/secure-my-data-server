@@ -19,6 +19,7 @@ class CreateSecuredDataTable extends Migration
             $table->string('name');
             $table->string('ext')->nullable();
             $table->string('mime_type')->nullable();
+            $table->bigInteger('size')->nullable();
             $table->timestamps();
         });
     }

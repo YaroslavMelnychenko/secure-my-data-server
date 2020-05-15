@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Helpers;
 
 use App\Models\Encryption\Asymmetric;
+use App\Models\Session;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,13 +22,14 @@ use App\Models\Encryption\Asymmetric;
 |
 */
 
-$factory->define(User::class, function (Faker $faker) {
-    $seed = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+$seed = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+$keyPair = Asymmetric::createKeyPair($seed);
 
+$factory->define(User::class, function (Faker $faker) use ($keyPair) {
     return [
         'email' => $faker->unique()->safeEmail,
         'password' => bcrypt('passwordstring'),
-        'public_key' => Asymmetric::createKeyPair($seed)->exportPublicKey(),
+        'public_key' => $keyPair->exportPublicKey(),
         'verified' => false,
         'verification_code' => $faker->randomNumber(6)
     ];
@@ -38,4 +40,9 @@ $factory->state(User::class, 'verified', function ($faker) {
         'verified' => true,
         'verification_code' => null
     ];
+});
+
+$factory->afterCreatingState(User::class, 'logged', function ($user, $faker) use ($keyPair) {
+    $session = Session::createInstance($user, Helpers::randomHex(856));
+    $session->storeKeyPair($keyPair);
 });

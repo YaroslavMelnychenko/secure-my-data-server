@@ -85,23 +85,23 @@ class SecuredDataController extends Controller
     public function update(UpdateRequest $request, SecuredData $data) {
         $this->checkBelongsToUser($data);
 
-        // update data name
+        $data->name = $request->name;
+        $data->save();
 
         return Response::send([
             'error' => false,
-            'message' => "Edit data with new information",
-            'request' => $request->all()
+            'message' => $data
         ], 'SUCCESS');
     }
 
     public function destroy(SecuredData $data) {
         $this->checkBelongsToUser($data);
 
-        // remove data
+        $data->remove();
 
         return Response::send([
             'error' => false,
-            'message' => "Delete data"
+            'message' => $data
         ], 'SUCCESS');
     }
 }

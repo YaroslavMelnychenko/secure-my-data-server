@@ -24,21 +24,9 @@ class SecuredData extends Model
         return Storage::disk(config('filesystems.cloud'));
     }
 
-    protected function cryptor() {
-        $asymmetricKeyPair = $this->user->session->obtaineKeyPair();
-         
-        return Symmetric::createFromAsymmetric($this->user->password, $asymmetricKeyPair);        
-    }
-
     protected function fillInformation($array) {
-        $this->user_id = $array['user_id'];
-        $this->name = $array['name'];
-        $this->ext = $array['ext'];
-        $this->mime_type = $array['mime_type'];
-    }
-
-    protected function saveToCloud($content) {
-        $this->disk()->put($this->id, $content);
+        foreach($array as $key => $value)
+            $this[$key] = $value;
     }
 
     public function user() {
@@ -47,6 +35,11 @@ class SecuredData extends Model
 
     public function belongsToUser(User $user) {
         return $this->user->id === $user->id;
+    }
+
+    public function remove() {
+        $this->removeFromCloud();
+        $this->delete();
     }
 
     public function getFullName() {
@@ -81,6 +74,20 @@ class SecuredData extends Model
         }
     }
 
+    public function cryptor() {
+        $asymmetricKeyPair = $this->user->session->obtaineKeyPair();
+         
+        return Symmetric::createFromAsymmetric($this->user->password, $asymmetricKeyPair);        
+    }
+
+    public function saveToCloud($content) {
+        $this->disk()->put($this->id, $content);
+    }
+
+    public function removeFromCloud() {
+        $this->disk()->delete($this->id);
+    }
+
     public static function storeAttachment(User $user, StoreRequest $request) {
         $file = $request->file('attachment');
 
@@ -90,6 +97,7 @@ class SecuredData extends Model
         $fileExt = end($tmp);
         $fileName = str_replace('.'.$fileExt, '', $fullFileName);
         $fileMimeType = $file->getClientMimeType();
+        $fileOriginalSize = $file->getSize();
 
         $instance = new static();
 
@@ -97,7 +105,8 @@ class SecuredData extends Model
             'user_id' => $user->id,
             'name' => $fileName,
             'ext' => $fileExt,
-            'mime_type' => $fileMimeType
+            'mime_type' => $fileMimeType,
+            'size' => $fileOriginalSize
         ]);
 
         $instance->save();
@@ -119,7 +128,8 @@ class SecuredData extends Model
             'user_id' => $user->id,
             'name' => $name,
             'ext' => null,
-            'mime_type' => null
+            'mime_type' => null,
+            'size' => null
         ]);
 
         $instance->save();
