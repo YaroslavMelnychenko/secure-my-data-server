@@ -24,7 +24,7 @@ class RefreshRequest extends FormRequest
     public function rules()
     {
         return [
-            'refresh_token' => ['required', 'regex:/[A-Za-z0-9\-\._~\+\/]+=*/']
+            'refresh_token' => ['required', 'regex:/[A-Za-z0-9\-\._~\+\/]+=*/', 'max:1024']
         ];
     }
 }

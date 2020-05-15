@@ -96,7 +96,7 @@ class SecuredData extends Model
         $tmp = explode(".", $fullFileName);
         $fileExt = end($tmp);
         $fileName = str_replace('.'.$fileExt, '', $fullFileName);
-        $fileMimeType = $file->getClientMimeType();
+        $fileMimeType = $file->getMimeType();
         $fileOriginalSize = $file->getSize();
 
         $instance = new static();

@@ -28,7 +28,8 @@ class StoreRequest extends FormRequest
             'attachment' => [
                 'required_without_all:plain_data,plain_name',
                 'file',
-                'max:' .config('secured_data.attachment.max_size')
+                'max:' .config('secured_data.attachment.max_size'),
+                'mimetypes:' .implode(',', config('secured_data.attachment.mimetypes'))
             ],
 
             /** Or plain data */
