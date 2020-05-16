@@ -17,3 +17,8 @@ use Illuminate\Support\Facades\Artisan;
 Artisan::command('inspire', function () {
     $this->comment(Carbon\Carbon::now());
 })->describe('Display an inspiring quote');
+
+Artisan::command('logs:clear', function() {
+    exec('rm ' . storage_path('logs/*.log'));
+    $this->comment('Logs have been cleared!');
+})->describe('Clear log files');
