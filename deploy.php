@@ -103,6 +103,11 @@ task('passport:install', function () {
     run('{{bin/php}} {{artisan}} passport:install');
 });
 
+// Clear all application data
+task('artisan:application:flush', function () {
+    run('{{bin/php}} {{artisan}} application:flush');
+});
+
 // Tasks
 task('php-fpm:restart', function () {
     // The user must have rights for restart service
