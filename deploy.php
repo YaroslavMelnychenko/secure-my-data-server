@@ -116,6 +116,16 @@ task('php-fpm:restart', function () {
     run('sudo systemctl restart php7.2-fpm.service');
 })->desc('Restart PHP-FPM service');
 
+// Remove cron task
+task('cron:remove', function () {
+    run('crontab -r');
+});
+
+// Setup cron task
+task('cron:setup', function () {
+    run('crontab ~/crontask');
+});
+
 // [Optional] if deploy fails automatically unlock.
 after('deploy:failed', 'deploy:unlock');
 
@@ -134,8 +144,13 @@ task('deploy', [
     'php-fpm:restart',
     'artisan:cache:clear',
     'artisan:config:clear',
-
     'deploy:symlink',
     'deploy:unlock',
     'cleanup'
+]);
+
+task('deploy:cron', [
+    'cron:remove',
+    'deploy',
+    'cron:setup'
 ]);
