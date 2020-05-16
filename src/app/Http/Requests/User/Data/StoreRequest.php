@@ -35,7 +35,8 @@ class StoreRequest extends FormRequest
             /** Or plain data */
             'plain_data' => [
                 'required_without_all:attachment', 
-                'required_with_all:plain_name'
+                'required_with_all:plain_name',
+                'max:' .config('secured_data.plain_data.max_size')
             ],
             'plain_name' => [
                 'required_without_all:attachment', 

@@ -63,6 +63,9 @@ Route::prefix('/users')->name('users.')->group(function() {
         /** Get common user`s information */
         Route::get('/details', 'UserController@details')->name('details');
 
+        /** Report an error */
+        Route::post('/faults', 'UserController@report')->name('report');
+
     });
 
 });

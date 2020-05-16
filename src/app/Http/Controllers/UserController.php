@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Http\Response;
 use App\Http\Requests\User\VerifyRequest;
+use App\Http\Requests\User\FaultReportRequest;
+
+use App\Models\Fault;
+
 use App\Events\UserRegistered;
 
 class UserController extends Controller
@@ -51,10 +55,20 @@ class UserController extends Controller
     public function details() {
         $details = $this->user;
         $details['session'] = $this->user->session;
+        $details['faults'] = $this->user->faults;
 
         return Response::send([
             'error' => false,
             'message' => $details
+        ], 'SUCCESS');
+    }
+
+    public function report(FaultReportRequest $request) {
+        $fault = Fault::report($this->user, $request);
+
+        return Response::send([
+            'error' => false,
+            'message' => $fault
         ], 'SUCCESS');
     }
 }

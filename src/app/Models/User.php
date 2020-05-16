@@ -11,6 +11,7 @@ use App\Models\Traits\Uuid;
 use App\Models\Encryption\Asymmetric;
 use App\Models\Session;
 use App\Models\SecuredData;
+use App\Models\Fault;
 
 use App\Http\Requests\Auth\RegisterRequest;
 
@@ -51,6 +52,10 @@ class User extends Authenticatable
 
     public function data() {
         return $this->hasMany(SecuredData::class);
+    }
+
+    public function faults() {
+        return $this->hasMany(Fault::class);
     }
 
     public function asymmetricChallenge(Asymmetric $keyPair) {
