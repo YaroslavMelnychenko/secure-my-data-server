@@ -64,6 +64,7 @@ task('upload:env', function () {
     runLocally('rsync -v -e ssh src/.env.production deployer:{{deploy_path}}/shared/src/.env');
 })->desc('Environment setup');
 
+// Install vendor dependecies
 task('deploy:vendors', function () {
     run('cd {{release_path}}/src && composer install --verbose --prefer-dist --no-progress --no-interaction --no-dev --optimize-autoloader --no-suggest');
 })->desc('Install composer dependencies');
@@ -108,7 +109,7 @@ task('artisan:application:flush', function () {
     run('{{bin/php}} {{artisan}} application:flush');
 });
 
-// Tasks
+// Restart php-fpm
 task('php-fpm:restart', function () {
     // The user must have rights for restart service
     // /etc/sudoers: username ALL=NOPASSWD:/bin/systemctl restart php-fpm.service
