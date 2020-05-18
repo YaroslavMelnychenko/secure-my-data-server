@@ -52,7 +52,8 @@ set('laravel_version', function () {
 });
 
 // Hosts
-host('deployer')
+host('amazon')
+    ->user('deployer')
     ->set('deploy_path', '/var/www/smd')
     ->configFile('/etc/ssh/ssh_config');    
 
@@ -61,7 +62,7 @@ host('deployer')
 // Upload .env.production
 task('upload:env', function () {
     run('mkdir -p {{deploy_path}}/shared/src');
-    runLocally('rsync -v -e ssh src/.env.production deployer:{{deploy_path}}/shared/src/.env');
+    runLocally('rsync -v -e ssh src/.env.production deployer@amazon:{{deploy_path}}/shared/src/.env');
 })->desc('Environment setup');
 
 // Install vendor dependecies
