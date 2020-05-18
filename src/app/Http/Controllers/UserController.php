@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Response;
 use App\Http\Requests\User\VerifyRequest;
 use App\Http\Requests\User\FaultReportRequest;
+use App\Http\Requests\User\IndexRequest;
 
 use App\Models\Fault;
+use App\Models\User;
 
 use App\Events\UserRegistered;
 
@@ -21,6 +23,28 @@ class UserController extends Controller
             $this->user = Auth::user(); 
             return $next($request);
         });
+    }
+
+    public function index(IndexRequest $request) {
+        if(User::exists($request->email)) {
+
+            return Response::send([
+                'error' => 'false',
+                'message' => [
+                    'exists' => true
+                ]
+            ], 'SUCCESS');
+
+        } else {
+
+            return Response::send([
+                'error' => 'false',
+                'message' => [
+                    'exists' => false
+                ]
+            ], 'SUCCESS');
+
+        }
     }
 
     public function verify(VerifyRequest $request) {

@@ -34,6 +34,9 @@ Route::prefix('/auth')->group(function() {
 /** Endpoints for handling user`s information */
 Route::prefix('/users')->name('users.')->group(function() {
 
+    /** Check user existing */
+    Route::get('/', 'UserController@index');
+
     /** For these endpoints user must be authenticated */
     Route::middleware(['auth:api'])->group(function() {
 
