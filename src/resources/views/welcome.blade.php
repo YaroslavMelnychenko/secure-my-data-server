@@ -70,7 +70,7 @@
                     Secure My Data
                 </div>
                 <div class="links">
-                    <a href="https://github.com/laravel/laravel">Download client</a>
+                    <a href="https://github.com/YaroslavMelnychenko/secure-my-data-client/releases/tag/v1.0.0-beta">Download client</a>
                 </div>
             </div>
         </div>
